@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USR寂 — Unscripted Route</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --black:#080808;
+  --white:#f0f0ee;
+  --gray:#1a1a1a;
+  --gray2:#2a2a2a;
+  --muted:#555;
+  --muted2:#888;
+  --pink:#ff2d7a;
+  --pink-dim:rgba(255,45,122,0.15);
+  --mono:'Space Mono',monospace;
+  --sans:'Space Grotesk',sans-serif;
+}
+
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:var(--sans);overflow-x:hidden;line-height:1.6}
+
+/* ── CURSOR ── */
+.cursor{position:fixed;width:8px;height:8px;background:var(--pink);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,opacity .2s;mix-blend-mode:normal}
+.cursor.big{width:40px;height:40px;background:transparent;border:1px solid var(--pink);opacity:.6}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:24px 48px;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+nav::before{content:'';position:absolute;inset:0;background:rgba(8,8,8,0.7);backdrop-filter:blur(20px);z-index:-1}
+.nav-logo{font-family:var(--mono);font-size:15px;letter-spacing:4px;color:var(--white);text-decoration:none}
+.nav-logo span{color:var(--pink)}
+.nav-links{display:flex;gap:40px}
+.nav-links a{font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--muted2);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--white)}
+.nav-right{display:flex;align-items:center;gap:24px}
+.nav-phone{font-family:var(--mono);font-size:12px;color:var(--muted2);letter-spacing:1px}
+.nav-preorder{
+  font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  border:1px solid var(--pink);color:var(--pink);
+  padding:8px 20px;text-decoration:none;
+  transition:background .2s,color .2s;
+}
+.nav-preorder:hover{background:var(--pink);color:#fff}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;
+  padding:120px 48px 80px;
+  position:relative;overflow:hidden;
+}
+.hero-kanji{
+  position:absolute;
+  font-size:clamp(200px,30vw,480px);
+  color:rgba(255,255,255,0.025);
+  font-weight:900;
+  left:-40px;top:50%;transform:translateY(-50%);
+  pointer-events:none;user-select:none;
+  line-height:1;
+  z-index:0;
+}
+.hero-left{position:relative;z-index:1}
+.hero-eyebrow{
+  font-family:var(--mono);font-size:10px;
+  letter-spacing:5px;text-transform:uppercase;
+  color:var(--pink);margin-bottom:32px;
+  display:flex;align-items:center;gap:16px;
+}
+.hero-eyebrow::before{content:'';display:block;width:32px;height:1px;background:var(--pink)}
+.hero-title{
+  font-family:var(--mono);
+  font-size:clamp(13px,1.8vw,18px);
+  letter-spacing:8px;text-transform:uppercase;
+  color:var(--white);line-height:2;
+  margin-bottom:24px;font-weight:400;
+}
+.hero-kanji-inline{
+  font-size:clamp(80px,12vw,160px);
+  font-weight:900;
+  line-height:1;color:var(--white);
+  display:block;margin-bottom:16px;
+  letter-spacing:-4px;
+}
+.hero-sub{
+  font-family:var(--mono);font-size:10px;
+  letter-spacing:5px;text-transform:uppercase;
+  color:var(--muted2);margin-bottom:56px;
+}
+.hero-actions{display:flex;gap:20px;align-items:center}
+.btn-pink{
+  background:var(--pink);color:#fff;
+  font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  padding:14px 32px;text-decoration:none;
+  transition:opacity .2s,transform .2s;
+  display:inline-block;
+}
+.btn-pink:hover{opacity:.85;transform:translateY(-1px)}
+.btn-ghost-white{
+  font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted2);text-decoration:none;
+  display:flex;align-items:center;gap:12px;
+  transition:color .2s;
+}
+.btn-ghost-white::after{content:'→';transition:transform .2s}
+.btn-ghost-white:hover{color:var(--white)}
+.btn-ghost-white:hover::after{transform:translateX(4px)}
+
+.hero-right{
+  position:relative;z-index:1;
+  display:flex;align-items:center;justify-content:center;
+}
+.helmet-wrap{
+  width:clamp(300px,45vw,580px);
+  height:clamp(300px,45vw,580px);
+  position:relative;
+}
+.helmet-wrap img{
+  width:100%;height:100%;
+  object-fit:contain;
+  filter:drop-shadow(0 0 80px rgba(255,255,255,0.08));
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{
+  0%,100%{transform:translateY(0) rotate(-1deg)}
+  50%{transform:translateY(-16px) rotate(1deg)}
+}
+.helmet-glow{
+  position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 50%,rgba(255,45,122,0.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+/* crosshair top center */
+.crosshair{
+  position:absolute;top:32px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  opacity:.3;pointer-events:none;
+}
+.crosshair-h{width:60px;height:1px;background:var(--white)}
+.crosshair-v{width:1px;height:20px;background:var(--white)}
+.crosshair-dot{width:4px;height:4px;background:var(--white);border-radius:50%;margin:-2px 0}
+
+/* scroll indicator */
+.scroll-hint{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.scroll-hint span{font-family:var(--mono);font-size:9px;letter-spacing:4px;color:var(--muted);text-transform:uppercase}
+.scroll-line{width:1px;height:40px;background:linear-gradient(to bottom,var(--muted),transparent);animation:scrollPulse 2s ease-in-out infinite}
+@keyframes scrollPulse{0%,100%{opacity:.3;transform:scaleY(1)}50%{opacity:1;transform:scaleY(1.2)}}
+
+/* ── MANIFESTO ── */
+.manifesto{
+  padding:120px 48px;
+  border-top:1px solid rgba(255,255,255,0.06);
+  display:grid;grid-template-columns:1fr 2fr;gap:80px;align-items:start;
+}
+.manifesto-label{
+  font-family:var(--mono);font-size:10px;letter-spacing:4px;
+  text-transform:uppercase;color:var(--pink);
+  padding-top:8px;
+}
+.manifesto-text h2{
+  font-family:var(--mono);
+  font-size:clamp(24px,3vw,40px);
+  font-weight:400;letter-spacing:2px;
+  line-height:1.4;margin-bottom:40px;
+  color:var(--white);
+}
+.manifesto-text h2 em{font-style:normal;color:var(--pink)}
+.manifesto-pills{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:48px}
+.pill{
+  border:1px solid rgba(255,255,255,0.12);
+  font-family:var(--mono);font-size:9px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--muted2);
+  padding:8px 20px;
+  transition:border-color .2s,color .2s;
+}
+.pill:hover{border-color:var(--pink);color:var(--white)}
+.manifesto-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.06)}
+.mstat{
+  background:var(--black);padding:32px 24px;
+  border:none;
+}
+.mstat-n{
+  font-family:var(--mono);font-size:36px;font-weight:700;
+  color:var(--white);letter-spacing:-1px;margin-bottom:8px;
+  line-height:1;
+}
+.mstat-n span{color:var(--pink)}
+.mstat-l{font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+
+/* ── MARKET ── */
+.market{
+  padding:120px 48px;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+.section-header{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:64px;
+}
+.section-label{font-family:var(--mono);font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--pink);margin-bottom:12px}
+.section-title{font-family:var(--mono);font-size:clamp(20px,2.5vw,32px);font-weight:400;letter-spacing:2px;color:var(--white)}
+.section-link{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted2);text-decoration:none;display:flex;align-items:center;gap:8px;transition:color .2s}
+.section-link:hover{color:var(--white)}
+
+.products-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.06)}
+.product-card{
+  background:var(--black);padding:40px 32px;
+  position:relative;overflow:hidden;cursor:pointer;
+  transition:background .3s;
+}
+.product-card:hover{background:var(--gray)}
+.product-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:var(--pink);transform:scaleX(0);transform-origin:left;
+  transition:transform .3s;
+}
+.product-card:hover::after{transform:scaleX(1)}
+.product-img{
+  width:100%;aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:32px;
+  position:relative;
+}
+.product-img img{width:75%;height:75%;object-fit:contain;filter:brightness(0.9)}
+.product-badge{
+  position:absolute;top:0;right:0;
+  background:var(--pink);
+  font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  color:#fff;padding:4px 10px;
+}
+.product-num{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--muted);margin-bottom:12px}
+.product-name{font-family:var(--mono);font-size:14px;letter-spacing:2px;color:var(--white);margin-bottom:8px;font-weight:400}
+.product-desc{font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:24px}
+.product-footer{display:flex;justify-content:space-between;align-items:center}
+.product-price{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--white);letter-spacing:1px}
+.product-cta{
+  font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--pink);text-decoration:none;
+  display:flex;align-items:center;gap:6px;transition:gap .2s;
+}
+.product-card:hover .product-cta{gap:10px}
+
+/* ── PREORDER ── */
+.preorder{
+  padding:120px 48px;
+  border-top:1px solid rgba(255,255,255,0.06);
+  background:var(--gray);
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+}
+.preorder-left .section-label{margin-bottom:16px}
+.preorder-left h2{
+  font-family:var(--mono);font-size:clamp(28px,3.5vw,48px);
+  font-weight:400;letter-spacing:2px;line-height:1.3;
+  color:var(--white);margin-bottom:24px;
+}
+.preorder-left h2 span{color:var(--pink)}
+.preorder-left p{color:var(--muted2);font-size:15px;line-height:1.8;margin-bottom:40px}
+.preorder-form{display:flex;flex-direction:column;gap:16px}
+.input-group{display:flex;flex-direction:column;gap:6px}
+.input-group label{font-family:var(--mono);font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.input-group input,.input-group select,.input-group textarea{
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  color:var(--white);
+  font-family:var(--mono);font-size:13px;
+  padding:14px 16px;outline:none;
+  transition:border-color .2s;
+  width:100%;
+}
+.input-group input:focus,.input-group select:focus,.input-group textarea:focus{border-color:var(--pink)}
+.input-group select{appearance:none;cursor:pointer}
+.input-group textarea{resize:vertical;min-height:100px}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-submit{
+  background:var(--pink);color:#fff;
+  font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  padding:16px;border:none;cursor:pointer;
+  transition:opacity .2s;margin-top:8px;
+  width:100%;
+}
+.form-submit:hover{opacity:.85}
+.preorder-right-img{
+  display:flex;align-items:center;justify-content:center;
+}
+.preorder-right-img img{
+  width:90%;filter:drop-shadow(0 0 60px rgba(255,45,122,0.1));
+}
+
+/* ── ABOUT ── */
+.about{
+  padding:120px 48px;
+  border-top:1px solid rgba(255,255,255,0.06);
+}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.about-kanji-big{
+  font-size:200px;font-weight:900;line-height:1;
+  color:rgba(255,255,255,0.06);
+  margin-bottom:-40px;display:block;
+}
+.about-text .section-label{margin-bottom:20px}
+.about-text h2{
+  font-family:var(--mono);font-size:clamp(20px,2.5vw,32px);
+  font-weight:400;letter-spacing:2px;line-height:1.5;
+  color:var(--white);margin-bottom:32px;
+}
+.about-text p{color:var(--muted2);font-size:15px;line-height:1.9;margin-bottom:20px}
+.about-text p em{font-style:normal;color:var(--white)}
+.about-values{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.06);
+  margin-top:40px;
+}
+.value{background:var(--black);padding:24px 20px}
+.value-icon{font-size:20px;margin-bottom:12px;display:block}
+.value-title{font-family:var(--mono);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--white);margin-bottom:6px}
+.value-text{font-size:12px;color:var(--muted2);line-height:1.7}
+
+/* ── CONTACT ── */
+.contact{
+  padding:120px 48px;
+  border-top:1px solid rgba(255,255,255,0.06);
+  text-align:center;position:relative;overflow:hidden;
+}
+.contact::before{
+  content:'';position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(255,45,122,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+.contact-kanji{
+  font-size:clamp(80px,15vw,160px);font-weight:900;
+  color:rgba(255,255,255,0.04);
+  display:block;margin-bottom:0;line-height:1;
+  position:relative;
+}
+.contact .section-label{margin-bottom:20px}
+.contact h2{
+  font-family:var(--mono);font-size:clamp(18px,3vw,36px);
+  font-weight:400;letter-spacing:4px;text-transform:uppercase;
+  color:var(--white);margin-bottom:16px;
+}
+.contact p{color:var(--muted2);margin-bottom:48px;font-size:14px;letter-spacing:1px}
+.contact-links{display:flex;justify-content:center;align-items:center;gap:32px;flex-wrap:wrap}
+.contact-link{
+  font-family:var(--mono);font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--muted2);text-decoration:none;
+  display:flex;align-items:center;gap:10px;
+  transition:color .2s;padding:16px 0;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  min-width:220px;justify-content:center;
+}
+.contact-link:hover{color:var(--pink);border-color:var(--pink)}
+.contact-link .link-icon{font-size:16px}
+.contact-divider{color:var(--muted);opacity:.3}
+
+/* ── FOOTER ── */
+footer{
+  padding:32px 48px;
+  border-top:1px solid rgba(255,255,255,0.06);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.footer-logo{font-family:var(--mono);font-size:13px;letter-spacing:4px;color:rgba(255,255,255,.3)}
+.footer-logo span{color:var(--pink)}
+.footer-copy{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  nav{padding:20px 24px}
+  .nav-links{display:none}
+  .nav-phone{display:none}
+  .hero{grid-template-columns:1fr;padding:100px 24px 60px;text-align:center}
+  .hero-left .hero-eyebrow{justify-content:center}
+  .hero-left .hero-actions{justify-content:center}
+  .hero-right{margin-top:40px}
+  .manifesto{grid-template-columns:1fr;padding:80px 24px;gap:40px}
+  .market{padding:80px 24px}
+  .products-grid{grid-template-columns:1fr}
+  .preorder{grid-template-columns:1fr;padding:80px 24px;gap:48px}
+  .preorder-right-img{display:none}
+  .about{padding:80px 24px}
+  .about-grid{grid-template-columns:1fr}
+  .contact{padding:80px 24px}
+  footer{padding:24px;flex-direction:column;gap:12px;text-align:center}
+  .manifesto-stats{grid-template-columns:1fr}
+  .input-row{grid-template-columns:1fr}
+  .section-header{flex-direction:column;align-items:flex-start;gap:16px}
+}
+
+@media(prefers-reduced-motion:no-preference){
+  .hero-left>*{animation:fadeUp .9s ease both}
+  .hero-eyebrow{animation-delay:.1s}
+  .hero-title{animation-delay:.2s}
+  .hero-kanji-inline{animation-delay:.3s}
+  .hero-sub{animation-delay:.4s}
+  .hero-actions{animation-delay:.5s}
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(20px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<nav>
+  <a href="#" class="nav-logo">USR<span>寂</span></a>
+  <div class="nav-links">
+    <a href="#about">О бренде</a>
+    <a href="#market">Маркет</a>
+    <a href="#preorder">Предзаказ</a>
+    <a href="#contact">Контакт</a>
+  </div>
+  <div class="nav-right">
+    <span class="nav-phone">+380 99 515 57 42</span>
+    <a href="#preorder" class="nav-preorder">Предзаказ</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="crosshair">
+    <div class="crosshair-h"></div>
+    <div class="crosshair-v"></div>
+    <div class="crosshair-dot"></div>
+    <div class="crosshair-v"></div>
+  </div>
+  <div class="hero-kanji">寂</div>
+
+  <div class="hero-left">
+    <div class="hero-eyebrow">Personal brand</div>
+    <div class="hero-title">UNSCRIPTED&nbsp;&nbsp;ROUTE</div>
+    <span class="hero-kanji-inline">USR寂</span>
+    <div class="hero-sub">No identity.&nbsp;&nbsp;No noise.</div>
+    <div class="hero-actions">
+      <a href="#preorder" class="btn-pink">Предзаказ</a>
+      <a href="#market" class="btn-ghost-white">Маркет</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="helmet-wrap">
+      <div class="helmet-glow"></div>
+      <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cellipse cx='200' cy='180' rx='140' ry='145' fill='%23888' opacity='.18'/%3E%3Cellipse cx='200' cy='175' rx='125' ry='130' fill='%23666' opacity='.2'/%3E%3Crect x='90' y='195' width='220' height='90' rx='8' fill='%23222' opacity='.9'/%3E%3Cellipse cx='200' cy='195' rx='110' ry='20' fill='%23111'/%3E%3Crect x='110' y='270' width='180' height='30' rx='6' fill='%23333' opacity='.7'/%3E%3Ctext x='200' y='195' text-anchor='middle' font-size='110' font-weight='900' fill='%23aaa' opacity='.15' font-family='serif'%3E寂%3C/text%3E%3C/svg%3E" alt="USR helmet" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>scroll</span>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section class="manifesto" id="about">
+  <div class="manifesto-label">寂 / манифест</div>
+  <div class="manifesto-text">
+    <h2>Это не про скорость.<br>Это про <em>путь без сценария</em>.</h2>
+    <div class="manifesto-pills">
+      <span class="pill">Без шаблонов</span>
+      <span class="pill">Без лишнего шума</span>
+      <span class="pill">Своя дорога</span>
+      <span class="pill">Украина · Мир</span>
+      <span class="pill">2024 — ∞</span>
+    </div>
+    <div class="manifesto-stats">
+      <div class="mstat">
+        <div class="mstat-n">01<span>↗</span></div>
+        <div class="mstat-l">Бренд / год запуска</div>
+      </div>
+      <div class="mstat">
+        <div class="mstat-n">∞</div>
+        <div class="mstat-l">Маршрутов без скрипта</div>
+      </div>
+      <div class="mstat">
+        <div class="mstat-n">寂</div>
+        <div class="mstat-l">Философия тишины</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARKET -->
+<section class="market" id="market">
+  <div class="section-header">
+    <div>
+      <div class="section-label">/ маркет</div>
+      <div class="section-title">Экипировка бренда</div>
+    </div>
+    <a href="#preorder" class="section-link">Все товары →</a>
+  </div>
+
+  <div class="products-grid">
+    <div class="product-card">
+      <div class="product-img">
+        <span class="product-badge">Предзаказ</span>
+        <svg viewBox="0 0 200 200" width="140" height="140">
+          <ellipse cx="100" cy="90" rx="70" ry="75" fill="none" stroke="#aaa" stroke-width="2" opacity=".6"/>
+          <rect x="35" y="100" width="130" height="55" rx="5" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
+          <ellipse cx="100" cy="100" rx="60" ry="12" fill="#111"/>
+          <rect x="55" y="145" width="90" height="18" rx="4" fill="#333" stroke="#555" stroke-width="1"/>
+          <circle cx="143" cy="115" r="5" fill="#444" stroke="#666" stroke-width="1"/>
+          <circle cx="143" cy="128" r="3" fill="#333" stroke="#555" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="product-num">USR — 001</div>
+      <div class="product-name">HELMET 寂 V.1</div>
+      <div class="product-desc">Кастомный шлем первой серии. Матовое покрытие, тёмный визор, фирменный иероглиф.</div>
+      <div class="product-footer">
+        <div class="product-price">— / предзаказ</div>
+        <a href="#preorder" class="product-cta">Заказать →</a>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        <svg viewBox="0 0 200 200" width="130" height="130">
+          <rect x="50" y="30" width="100" height="130" rx="8" fill="#1a1a1a" stroke="#555" stroke-width="1.5"/>
+          <rect x="60" y="45" width="80" height="50" rx="4" fill="#111" stroke="#333" stroke-width="1"/>
+          <text x="100" y="80" text-anchor="middle" font-size="22" fill="#888" font-weight="900">寂</text>
+          <rect x="65" y="108" width="70" height="2" fill="#333"/>
+          <rect x="65" y="118" width="50" height="2" fill="#333" opacity=".6"/>
+          <text x="100" y="145" text-anchor="middle" font-size="8" fill="#555" letter-spacing="2">USR</text>
+        </svg>
+      </div>
+      <div class="product-num">USR — 002</div>
+      <div class="product-name">HOODIE 寂 BLACK</div>
+      <div class="product-desc">Оверсайз худи с вышивкой иероглифа на груди. 100% хлопок, unisex.</div>
+      <div class="product-footer">
+        <div class="product-price">скоро</div>
+        <a href="#preorder" class="product-cta">Уведомить →</a>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        <svg viewBox="0 0 200 200" width="130" height="130">
+          <rect x="60" y="60" width="80" height="80" rx="40" fill="none" stroke="#888" stroke-width="2" opacity=".5"/>
+          <ellipse cx="100" cy="100" rx="55" ry="55" fill="#111" stroke="#444" stroke-width="1.5"/>
+          <text x="100" y="110" text-anchor="middle" font-size="32" fill="#999" font-weight="900">寂</text>
+          <circle cx="100" cy="100" r="62" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="4 6"/>
+        </svg>
+      </div>
+      <div class="product-num">USR — 003</div>
+      <div class="product-name">STICKER PACK</div>
+      <div class="product-desc">Набор виниловых стикеров. Шлем, иероглиф, логотип. Водостойкие.</div>
+      <div class="product-footer">
+        <div class="product-price">скоро</div>
+        <a href="#preorder" class="product-cta">Уведомить →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PREORDER -->
+<section class="preorder" id="preorder">
+  <div class="preorder-left">
+    <div class="section-label">/ предзаказ</div>
+    <h2>Стань первым.<br><span>Форма</span> предзаказа.</h2>
+    <p>Оставь заявку — свяжемся и обсудим детали. Первая серия ограничена. Без идентификации. Без лишнего шума.</p>
+
+    <div class="preorder-form">
+      <div class="input-row">
+        <div class="input-group">
+          <label>Имя</label>
+          <input type="text" placeholder="Как тебя зовут">
+        </div>
+        <div class="input-group">
+          <label>Контакт</label>
+          <input type="text" placeholder="Telegram / телефон">
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Что интересует</label>
+        <select>
+          <option value="">— выбери позицию —</option>
+          <option>Helmet 寂 V.1 — кастомный шлем</option>
+          <option>Hoodie 寂 Black — худи</option>
+          <option>Sticker Pack — стикеры</option>
+          <option>Другое / вопрос</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Сообщение</label>
+        <textarea placeholder="Расскажи подробнее — размер, цвет, пожелания..."></textarea>
+      </div>
+      <button class="form-submit" onclick="handleSubmit(event)">Отправить заявку →</button>
+    </div>
+  </div>
+
+  <div class="preorder-right-img">
+    <svg viewBox="0 0 400 500" width="360">
+      <defs>
+        <radialGradient id="hg" cx="50%" cy="40%">
+          <stop offset="0%" stop-color="#aaa" stop-opacity=".9"/>
+          <stop offset="60%" stop-color="#444" stop-opacity=".7"/>
+          <stop offset="100%" stop-color="#111" stop-opacity=".5"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="200" cy="200" rx="160" ry="170" fill="url(#hg)" opacity=".15"/>
+      <text x="200" y="300" text-anchor="middle" font-size="220" font-weight="900" fill="rgba(255,255,255,0.04)" font-family="serif">寂</text>
+      <text x="200" y="460" text-anchor="middle" font-size="11" fill="#555" letter-spacing="6" font-family="monospace">UNSCRIPTED ROUTE</text>
+      <circle cx="200" cy="200" r="155" fill="none" stroke="rgba(255,45,122,0.08)" stroke-width="1"/>
+      <circle cx="200" cy="200" r="170" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="3 8"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ABOUT BRAND -->
+<section class="about">
+  <div class="about-grid">
+    <div>
+      <span class="about-kanji-big">寂</span>
+    </div>
+    <div class="about-text">
+      <div class="section-label">/ о бренде</div>
+      <h2>Кто. Где.<br>Когда. Почему.</h2>
+      <p>USR寂 — это <em>личный бренд без сценария</em>. Не компания, не корпорация — точка зрения. Философия дороги, в которой нет заранее написанного маршрута.</p>
+      <p>Иероглиф 寂 означает <em>тишину, одиночество, безмолвие</em>. Именно это чувство — когда едешь один, без шума, без чужих ожиданий — стало основой бренда.</p>
+      <p>Украина. <em>2024.</em> Началось с идеи. Продолжается в движении.</p>
+      <div class="about-values">
+        <div class="value">
+          <span class="value-icon">◈</span>
+          <div class="value-title">Без скрипта</div>
+          <div class="value-text">Никакой заранее написанной роли. Только настоящий момент.</div>
+        </div>
+        <div class="value">
+          <span class="value-icon">✦</span>
+          <div class="value-title">Без шума</div>
+          <div class="value-text">Минимализм в визуале, максимум в смысле.</div>
+        </div>
+        <div class="value">
+          <span class="value-icon">⊹</span>
+          <div class="value-title">Своя дорога</div>
+          <div class="value-text">Каждый маршрут уникален. Как и каждый кто его выбирает.</div>
+        </div>
+        <div class="value">
+          <span class="value-icon">◇</span>
+          <div class="value-title">Настоящее</div>
+          <div class="value-text">Никаких трендов ради трендов. Только то, что честно.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <span class="contact-kanji">寂</span>
+  <div class="section-label">/ контакт</div>
+  <h2>На связи</h2>
+  <p>Предзаказ · Коллаборации · Вопросы</p>
+  <div class="contact-links">
+    <a href="https://t.me/USRbrand" class="contact-link">
+      <span class="link-icon">✈</span> Telegram
+    </a>
+    <span class="contact-divider">·</span>
+    <a href="tel:+380995155742" class="contact-link">
+      <span class="link-icon">◎</span> +380 99 515 57 42
+    </a>
+    <span class="contact-divider">·</span>
+    <a href="https://instagram.com/USRbrand" class="contact-link">
+      <span class="link-icon">◉</span> Instagram
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">USR<span>寂</span></div>
+  <div class="footer-copy">Unscripted Route · No identity. No noise. · 2024</div>
+</footer>
+
+<script>
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top = e.clientY + 'px';
+});
+document.querySelectorAll('a,button,.product-card,.pill').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+});
+
+function handleSubmit(e) {
+  e.preventDefault();
+  const btn = e.target;
+  btn.textContent = 'Заявка отправлена ✓';
+  btn.style.background = '#1a1a1a';
+  btn.style.border = '1px solid rgba(255,255,255,0.2)';
+  setTimeout(() => {
+    btn.textContent = 'Отправить заявку →';
+    btn.style.background = '';
+    btn.style.border = '';
+  }, 3000);
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      e.target.style.opacity = '1';
+      e.target.style.transform = 'translateY(0)';
+    }
+  });
+}, {threshold: 0.1});
+
+document.querySelectorAll('.product-card,.mstat,.value,.manifesto-pills').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity .6s ease, transform .6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
